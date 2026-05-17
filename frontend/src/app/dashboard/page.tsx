@@ -29,8 +29,6 @@ export default function DashboardPage() {
     }
   }, []);
 
-
-
   const fetchTodos = async () => {
     if (!user) return;
 
@@ -49,7 +47,7 @@ export default function DashboardPage() {
 
     try {
       console.log(title, user.username);
-      await createTodo(title, token || "");
+      await createTodo(title, user.username, token || "");
 
       setTitle("");
 
@@ -58,6 +56,10 @@ export default function DashboardPage() {
       console.log(error.response?.data);
     }
   };
+
+  const filterTodos = todos.filter(
+    (todo: any) => (todo.owner || todo.attributes?.owner) === user?.username
+  );
 
   const handleToggleStatus = async (todoId: string, currentStatus: boolean) => {
     try {
@@ -87,27 +89,26 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-gray-800 text-white p-6 md:p-10">
       <div className="max-w-5xl mx-auto">
-        
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-10">
           <div>
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
               Todo Dashboard
             </h1>
-  
+
             <p className="text-gray-400 mt-2">
               Manage your daily tasks efficiently 🚀
             </p>
           </div>
-  
+
           <button
             onClick={() => {
               Cookies.remove("token", {
                 path: "/",
               });
-  
+
               localStorage.removeItem("user");
-  
+
               window.location.replace("/signin");
             }}
             className="bg-white text-black px-5 py-3 rounded-2xl font-semibold hover:bg-gray-200 transition-all duration-300 shadow-lg"
@@ -115,13 +116,11 @@ export default function DashboardPage() {
             Logout
           </button>
         </div>
-  
+
         {/* Add Todo Card */}
         <div className="bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-6 shadow-2xl mb-10">
-          <h2 className="text-2xl font-semibold mb-5">
-            Add New Todo
-          </h2>
-  
+          <h2 className="text-2xl font-semibold mb-5">Add New Todo</h2>
+
           <div className="flex flex-col md:flex-row gap-4">
             <input
               type="text"
@@ -130,7 +129,7 @@ export default function DashboardPage() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
-  
+
             <button
               onClick={handleCreateTodo}
               className="bg-white text-black px-8 py-4 rounded-2xl font-semibold hover:scale-105 hover:bg-gray-200 transition-all duration-300 shadow-xl"
@@ -139,7 +138,7 @@ export default function DashboardPage() {
             </button>
           </div>
         </div>
-  
+
         {/* Todo List */}
         <div className="space-y-5">
           {todos.length === 0 ? (
@@ -147,13 +146,11 @@ export default function DashboardPage() {
               <h2 className="text-2xl font-semibold text-gray-300">
                 No Todos Yet
               </h2>
-  
-              <p className="text-gray-500 mt-2">
-                Add your first task above ✨
-              </p>
+
+              <p className="text-gray-500 mt-2">Add your first task above ✨</p>
             </div>
           ) : (
-            todos.map((todo: any) => (
+            filterTodos.map((todo: any) => (
               <div
                 key={todo.documentId || todo.id}
                 className="bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-5 shadow-xl hover:scale-[1.01] transition-all duration-300"
@@ -161,12 +158,10 @@ export default function DashboardPage() {
                 <div className="flex items-center gap-4">
                   <div
                     className={`w-4 h-4 rounded-full ${
-                      todo.isCompleted
-                        ? "bg-green-400"
-                        : "bg-yellow-400"
+                      todo.isCompleted ? "bg-green-400" : "bg-yellow-400"
                     }`}
                   />
-  
+
                   <p
                     className={`text-lg font-medium ${
                       todo.isCompleted
@@ -177,7 +172,7 @@ export default function DashboardPage() {
                     {todo.title || todo.attributes?.title}
                   </p>
                 </div>
-  
+
                 <div className="flex gap-3">
                   <button
                     onClick={() =>
@@ -192,17 +187,11 @@ export default function DashboardPage() {
                         : "bg-yellow-500 hover:bg-yellow-600"
                     }`}
                   >
-                    {todo.isCompleted
-                      ? "Completed"
-                      : "Pending"}
+                    {todo.isCompleted ? "Completed" : "Pending"}
                   </button>
-  
+
                   <button
-                    onClick={() =>
-                      handleDeleteTodo(
-                        todo.documentId || todo.id
-                      )
-                    }
+                    onClick={() => handleDeleteTodo(todo.documentId || todo.id)}
                     className="bg-red-500 hover:bg-red-600 px-5 py-2 rounded-2xl font-medium transition-all duration-300"
                   >
                     Delete

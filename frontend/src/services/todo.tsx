@@ -17,6 +17,7 @@ export const getTodos = async (
 
 export const createTodo = async (
   title: string,
+  owner:string,
   token: string
 ) => {
   const response = await API.post(
@@ -24,6 +25,7 @@ export const createTodo = async (
     {
       data: {
         title,
+        owner,
         isCompleted: false,
       },
     },
